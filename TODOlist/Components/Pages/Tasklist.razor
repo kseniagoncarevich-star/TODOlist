@@ -1,0 +1,72 @@
+﻿@page "/tasklist"
+@rendermode InteractiveServer
+
+
+<div class="controls">
+	<input type="text" placeholder="Новая задача" class="form-control" @bind="description" />
+	<button class="btn btn-primary" @onclick="AddTask">Добавить</button>
+</div>
+<hr />
+
+<h3>Tasklist</h3>
+
+<div class="statistics">
+	<h5>Всего: @tasklist.Count </h5>
+	<h5>Выполнено: @tasklist.Where(t => t.DONE == true).ToList().Count</h5>
+	<h5>Осталось:  @tasklist.Where(t => t.DONE == false).ToList().Count</h5>
+</div>
+
+<hr />
+
+<div class="controls">
+	<button class="btn btn-danger" @onclick="RemoveCompleted">Удалить выполненные</button>
+	<button class="btn btn-secondary" @onclick="ClearAll">Очистить</button>
+</div>
+
+<ul>
+	@foreach (TODO task in tasklist)
+	{
+		<li>
+			<input type="checkbox" id="@task.Description" @bind="task.DONE" />
+			<label for="@task.Description">@task.Description</label>
+			<small class="text-muted">— добавлено: @task.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+			<button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveTask(task)">Удалить</button>
+		</li>
+	}
+</ul>
+
+@code
+{
+	// List<TODO> tasklist = [];
+	List<TODO> tasklist =
+	[
+		new TODO{ Description = "Полить цветы" },
+		new TODO{ Description = "Покормить кота" },
+		new TODO{ Description = "Помыть посуду" },
+		new TODO{ Description = "Погладить одежду" },
+		new TODO{ Description = "Приготовить еду" },
+		new TODO{ Description = "Поработать" },
+	];
+	string description;
+	void AddTask()
+	{
+		if (string.IsNullOrWhiteSpace(description)) return;
+		if (tasklist.Contains(new TODO { Description = description })) return;
+		tasklist.Add(new TODO { Description = description });
+		description = "";
+	}
+	void RemoveTask(TODO task)
+	{
+		tasklist.Remove(task);
+	}
+
+	void RemoveCompleted()
+	{
+		tasklist.RemoveAll(t => t.DONE);
+	}
+
+	void ClearAll()
+	{
+		tasklist.Clear();
+	}
+}
